@@ -5,16 +5,11 @@
   */
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-  typeof define === 'function' && define.amd ? define(factory) :
-  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.bootstrap = factory());
-})(this, (function () { 'use strict';
+    typeof define === 'function' && define.amd ? define(factory) :
+      (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.bootstrap = factory());
+})(this, (function () {
+  'use strict';
 
-  /**
-   * --------------------------------------------------------------------------
-   * Bootstrap (v5.1.3): util/index.js
-   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
-   * --------------------------------------------------------------------------
-   */
   const MAX_UID = 1000000;
   const MILLISECONDS_MULTIPLIER = 1000;
   const TRANSITION_END = 'transitionend'; // Shoutout AngusCroll (https://goo.gl/pxwQGp)
@@ -25,86 +20,6 @@
     }
 
     return {}.toString.call(obj).match(/\s([a-z]+)/i)[1].toLowerCase();
-  };
-  /**
-   * --------------------------------------------------------------------------
-   * Public Util Api
-   * --------------------------------------------------------------------------
-   */
-
-
-  const getUID = prefix => {
-    do {
-      prefix += Math.floor(Math.random() * MAX_UID);
-    } while (document.getElementById(prefix));
-
-    return prefix;
-  };
-
-  const getSelector = element => {
-    let selector = element.getAttribute('data-bs-target');
-
-    if (!selector || selector === '#') {
-      let hrefAttr = element.getAttribute('href'); // The only valid content that could double as a selector are IDs or classes,
-      // so everything starting with `#` or `.`. If a "real" URL is used as the selector,
-      // `document.querySelector` will rightfully complain it is invalid.
-      // See https://github.com/twbs/bootstrap/issues/32273
-
-      if (!hrefAttr || !hrefAttr.includes('#') && !hrefAttr.startsWith('.')) {
-        return null;
-      } // Just in case some CMS puts out a full URL with the anchor appended
-
-
-      if (hrefAttr.includes('#') && !hrefAttr.startsWith('#')) {
-        hrefAttr = `#${hrefAttr.split('#')[1]}`;
-      }
-
-      selector = hrefAttr && hrefAttr !== '#' ? hrefAttr.trim() : null;
-    }
-
-    return selector;
-  };
-
-  const getSelectorFromElement = element => {
-    const selector = getSelector(element);
-
-    if (selector) {
-      return document.querySelector(selector) ? selector : null;
-    }
-
-    return null;
-  };
-
-  const getElementFromSelector = element => {
-    const selector = getSelector(element);
-    return selector ? document.querySelector(selector) : null;
-  };
-
-  const getTransitionDurationFromElement = element => {
-    if (!element) {
-      return 0;
-    } // Get transition-duration of the element
-
-
-    let {
-      transitionDuration,
-      transitionDelay
-    } = window.getComputedStyle(element);
-    const floatTransitionDuration = Number.parseFloat(transitionDuration);
-    const floatTransitionDelay = Number.parseFloat(transitionDelay); // Return 0 if element or transition duration is not found
-
-    if (!floatTransitionDuration && !floatTransitionDelay) {
-      return 0;
-    } // If multiple durations are defined, take the first
-
-
-    transitionDuration = transitionDuration.split(',')[0];
-    transitionDelay = transitionDelay.split(',')[0];
-    return (Number.parseFloat(transitionDuration) + Number.parseFloat(transitionDelay)) * MILLISECONDS_MULTIPLIER;
-  };
-
-  const triggerTransitionEnd = element => {
-    element.dispatchEvent(new Event(TRANSITION_END));
   };
 
   const isElement$1 = obj => {
@@ -144,68 +59,7 @@
     });
   };
 
-  const isVisible = element => {
-    if (!isElement$1(element) || element.getClientRects().length === 0) {
-      return false;
-    }
-
-    return getComputedStyle(element).getPropertyValue('visibility') === 'visible';
-  };
-
-  const isDisabled = element => {
-    if (!element || element.nodeType !== Node.ELEMENT_NODE) {
-      return true;
-    }
-
-    if (element.classList.contains('disabled')) {
-      return true;
-    }
-
-    if (typeof element.disabled !== 'undefined') {
-      return element.disabled;
-    }
-
-    return element.hasAttribute('disabled') && element.getAttribute('disabled') !== 'false';
-  };
-
-  const findShadowRoot = element => {
-    if (!document.documentElement.attachShadow) {
-      return null;
-    } // Can find the shadow root otherwise it'll return the document
-
-
-    if (typeof element.getRootNode === 'function') {
-      const root = element.getRootNode();
-      return root instanceof ShadowRoot ? root : null;
-    }
-
-    if (element instanceof ShadowRoot) {
-      return element;
-    } // when we don't find a shadow root
-
-
-    if (!element.parentNode) {
-      return null;
-    }
-
-    return findShadowRoot(element.parentNode);
-  };
-
-  const noop = () => {};
-  /**
-   * Trick to restart an element's animation
-   *
-   * @param {HTMLElement} element
-   * @return void
-   *
-   * @see https://www.charistheo.io/blog/2021/02/restart-a-css-animation-with-javascript/#restarting-a-css-animation
-   */
-
-
-  const reflow = element => {
-    // eslint-disable-next-line no-unused-expressions
-    element.offsetHeight;
-  };
+  const noop = () => { };
 
   const getjQuery = () => {
     const {
@@ -257,81 +111,6 @@
     });
   };
 
-  const execute = callback => {
-    if (typeof callback === 'function') {
-      callback();
-    }
-  };
-
-  const executeAfterTransition = (callback, transitionElement, waitForTransition = true) => {
-    if (!waitForTransition) {
-      execute(callback);
-      return;
-    }
-
-    const durationPadding = 5;
-    const emulatedDuration = getTransitionDurationFromElement(transitionElement) + durationPadding;
-    let called = false;
-
-    const handler = ({
-      target
-    }) => {
-      if (target !== transitionElement) {
-        return;
-      }
-
-      called = true;
-      transitionElement.removeEventListener(TRANSITION_END, handler);
-      execute(callback);
-    };
-
-    transitionElement.addEventListener(TRANSITION_END, handler);
-    setTimeout(() => {
-      if (!called) {
-        triggerTransitionEnd(transitionElement);
-      }
-    }, emulatedDuration);
-  };
-  /**
-   * Return the previous/next element of a list.
-   *
-   * @param {array} list    The list of elements
-   * @param activeElement   The active element
-   * @param shouldGetNext   Choose to get next or previous element
-   * @param isCycleAllowed
-   * @return {Element|elem} The proper element
-   */
-
-
-  const getNextActiveElement = (list, activeElement, shouldGetNext, isCycleAllowed) => {
-    let index = list.indexOf(activeElement); // if the element does not exist in the list return an element depending on the direction and if cycle is allowed
-
-    if (index === -1) {
-      return list[!shouldGetNext && isCycleAllowed ? list.length - 1 : 0];
-    }
-
-    const listLength = list.length;
-    index += shouldGetNext ? 1 : -1;
-
-    if (isCycleAllowed) {
-      index = (index + listLength) % listLength;
-    }
-
-    return list[Math.max(0, Math.min(index, listLength - 1))];
-  };
-
-  /**
-   * --------------------------------------------------------------------------
-   * Bootstrap (v5.1.3): dom/event-handler.js
-   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
-   * --------------------------------------------------------------------------
-   */
-  /**
-   * ------------------------------------------------------------------------
-   * Constants
-   * ------------------------------------------------------------------------
-   */
-
   const namespaceRegex = /[^.]*(?=\..*)\.|.*/;
   const stripNameRegex = /\..*/;
   const stripUidRegex = /::\d+$/;
@@ -344,11 +123,6 @@
   };
   const customEventsRegex = /^(mouseenter|mouseleave)/i;
   const nativeEvents = new Set(['click', 'dblclick', 'mouseup', 'mousedown', 'contextmenu', 'mousewheel', 'DOMMouseScroll', 'mouseover', 'mouseout', 'mousemove', 'selectstart', 'selectend', 'keydown', 'keypress', 'keyup', 'orientationchange', 'touchstart', 'touchmove', 'touchend', 'touchcancel', 'pointerdown', 'pointermove', 'pointerup', 'pointerleave', 'pointercancel', 'gesturestart', 'gesturechange', 'gestureend', 'focus', 'blur', 'change', 'reset', 'select', 'submit', 'focusin', 'focusout', 'load', 'unload', 'beforeunload', 'resize', 'move', 'DOMContentLoaded', 'readystatechange', 'error', 'abort', 'scroll']);
-  /**
-   * ------------------------------------------------------------------------
-   * Private methods
-   * ------------------------------------------------------------------------
-   */
 
   function getUidEvent(element, uid) {
     return uid && `${uid}::${uidEvent++}` || element.uidEvent || uidEvent++;
@@ -370,31 +144,6 @@
       }
 
       return fn.apply(element, [event]);
-    };
-  }
-
-  function bootstrapDelegationHandler(element, selector, fn) {
-    return function handler(event) {
-      const domElements = element.querySelectorAll(selector);
-
-      for (let {
-        target
-      } = event; target && target !== this; target = target.parentNode) {
-        for (let i = domElements.length; i--;) {
-          if (domElements[i] === target) {
-            event.delegateTarget = target;
-
-            if (handler.oneOff) {
-              EventHandler.off(element, event.type, selector, fn);
-            }
-
-            return fn.apply(target, [event]);
-          }
-        }
-      } // To please ESLint
-
-
-      return null;
     };
   }
 
@@ -473,153 +222,12 @@
     element.addEventListener(typeEvent, fn, delegation);
   }
 
-  function removeHandler(element, events, typeEvent, handler, delegationSelector) {
-    const fn = findHandler(events[typeEvent], handler, delegationSelector);
-
-    if (!fn) {
-      return;
-    }
-
-    element.removeEventListener(typeEvent, fn, Boolean(delegationSelector));
-    delete events[typeEvent][fn.uidEvent];
-  }
-
-  function removeNamespacedHandlers(element, events, typeEvent, namespace) {
-    const storeElementEvent = events[typeEvent] || {};
-    Object.keys(storeElementEvent).forEach(handlerKey => {
-      if (handlerKey.includes(namespace)) {
-        const event = storeElementEvent[handlerKey];
-        removeHandler(element, events, typeEvent, event.originalHandler, event.delegationSelector);
-      }
-    });
-  }
-
   function getTypeEvent(event) {
     // allow to get the native events from namespaced events ('click.bs.button' --> 'click')
     event = event.replace(stripNameRegex, '');
     return customEvents[event] || event;
   }
 
-  const EventHandler = {
-    on(element, event, handler, delegationFn) {
-      addHandler(element, event, handler, delegationFn, false);
-    },
-
-    one(element, event, handler, delegationFn) {
-      addHandler(element, event, handler, delegationFn, true);
-    },
-
-    off(element, originalTypeEvent, handler, delegationFn) {
-      if (typeof originalTypeEvent !== 'string' || !element) {
-        return;
-      }
-
-      const [delegation, originalHandler, typeEvent] = normalizeParams(originalTypeEvent, handler, delegationFn);
-      const inNamespace = typeEvent !== originalTypeEvent;
-      const events = getEvent(element);
-      const isNamespace = originalTypeEvent.startsWith('.');
-
-      if (typeof originalHandler !== 'undefined') {
-        // Simplest case: handler is passed, remove that listener ONLY.
-        if (!events || !events[typeEvent]) {
-          return;
-        }
-
-        removeHandler(element, events, typeEvent, originalHandler, delegation ? handler : null);
-        return;
-      }
-
-      if (isNamespace) {
-        Object.keys(events).forEach(elementEvent => {
-          removeNamespacedHandlers(element, events, elementEvent, originalTypeEvent.slice(1));
-        });
-      }
-
-      const storeElementEvent = events[typeEvent] || {};
-      Object.keys(storeElementEvent).forEach(keyHandlers => {
-        const handlerKey = keyHandlers.replace(stripUidRegex, '');
-
-        if (!inNamespace || originalTypeEvent.includes(handlerKey)) {
-          const event = storeElementEvent[keyHandlers];
-          removeHandler(element, events, typeEvent, event.originalHandler, event.delegationSelector);
-        }
-      });
-    },
-
-    trigger(element, event, args) {
-      if (typeof event !== 'string' || !element) {
-        return null;
-      }
-
-      const $ = getjQuery();
-      const typeEvent = getTypeEvent(event);
-      const inNamespace = event !== typeEvent;
-      const isNative = nativeEvents.has(typeEvent);
-      let jQueryEvent;
-      let bubbles = true;
-      let nativeDispatch = true;
-      let defaultPrevented = false;
-      let evt = null;
-
-      if (inNamespace && $) {
-        jQueryEvent = $.Event(event, args);
-        $(element).trigger(jQueryEvent);
-        bubbles = !jQueryEvent.isPropagationStopped();
-        nativeDispatch = !jQueryEvent.isImmediatePropagationStopped();
-        defaultPrevented = jQueryEvent.isDefaultPrevented();
-      }
-
-      if (isNative) {
-        evt = document.createEvent('HTMLEvents');
-        evt.initEvent(typeEvent, bubbles, true);
-      } else {
-        evt = new CustomEvent(event, {
-          bubbles,
-          cancelable: true
-        });
-      } // merge custom information in our event
-
-
-      if (typeof args !== 'undefined') {
-        Object.keys(args).forEach(key => {
-          Object.defineProperty(evt, key, {
-            get() {
-              return args[key];
-            }
-
-          });
-        });
-      }
-
-      if (defaultPrevented) {
-        evt.preventDefault();
-      }
-
-      if (nativeDispatch) {
-        element.dispatchEvent(evt);
-      }
-
-      if (evt.defaultPrevented && typeof jQueryEvent !== 'undefined') {
-        jQueryEvent.preventDefault();
-      }
-
-      return evt;
-    }
-
-  };
-
-  /**
-   * --------------------------------------------------------------------------
-   * Bootstrap (v5.1.3): dom/data.js
-   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
-   * --------------------------------------------------------------------------
-   */
-
-  /**
-   * ------------------------------------------------------------------------
-   * Constants
-   * ------------------------------------------------------------------------
-   */
   const elementMap = new Map();
   const Data = {
     set(element, key, instance) {
@@ -646,33 +254,7 @@
 
       return null;
     },
-
-    remove(element, key) {
-      if (!elementMap.has(element)) {
-        return;
-      }
-
-      const instanceMap = elementMap.get(element);
-      instanceMap.delete(key); // free up element references if there are no instances left for an element
-
-      if (instanceMap.size === 0) {
-        elementMap.delete(element);
-      }
-    }
-
   };
-
-  /**
-   * --------------------------------------------------------------------------
-   * Bootstrap (v5.1.3): base-component.js
-   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
-   * --------------------------------------------------------------------------
-   */
-  /**
-   * ------------------------------------------------------------------------
-   * Constants
-   * ------------------------------------------------------------------------
-   */
 
   const VERSION = '5.1.3';
 
@@ -687,20 +269,6 @@
       this._element = element;
       Data.set(this._element, this.constructor.DATA_KEY, this);
     }
-
-    dispose() {
-      Data.remove(this._element, this.constructor.DATA_KEY);
-      EventHandler.off(this._element, this.constructor.EVENT_KEY);
-      Object.getOwnPropertyNames(this).forEach(propertyName => {
-        this[propertyName] = null;
-      });
-    }
-
-    _queueCallback(callback, element, isAnimated = true) {
-      executeAfterTransition(callback, element, isAnimated);
-    }
-    /** Static */
-
 
     static getInstance(element) {
       return Data.get(getElement(element), this.DATA_KEY);
@@ -728,44 +296,6 @@
 
   }
 
-  /**
-   * --------------------------------------------------------------------------
-   * Bootstrap (v5.1.3): util/component-functions.js
-   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
-   * --------------------------------------------------------------------------
-   */
-
-  const enableDismissTrigger = (component, method = 'hide') => {
-    const clickEvent = `click.dismiss${component.EVENT_KEY}`;
-    const name = component.NAME;
-    EventHandler.on(document, clickEvent, `[data-bs-dismiss="${name}"]`, function (event) {
-      if (['A', 'AREA'].includes(this.tagName)) {
-        event.preventDefault();
-      }
-
-      if (isDisabled(this)) {
-        return;
-      }
-
-      const target = getElementFromSelector(this) || this.closest(`.${name}`);
-      const instance = component.getOrCreateInstance(target); // Method argument is left, for Alert and only, as it doesn't implement the 'hide' method
-
-      instance[method]();
-    });
-  };
-
-  /**
-   * --------------------------------------------------------------------------
-   * Bootstrap (v5.1.3): alert.js
-   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
-   * --------------------------------------------------------------------------
-   */
-  /**
-   * ------------------------------------------------------------------------
-   * Constants
-   * ------------------------------------------------------------------------
-   */
-
   const NAME$d = 'alert';
   const DATA_KEY$c = 'bs.alert';
   const EVENT_KEY$c = `.${DATA_KEY$c}`;
@@ -773,65 +303,6 @@
   const EVENT_CLOSED = `closed${EVENT_KEY$c}`;
   const CLASS_NAME_FADE$5 = 'fade';
   const CLASS_NAME_SHOW$8 = 'show';
-  /**
-   * ------------------------------------------------------------------------
-   * Class Definition
-   * ------------------------------------------------------------------------
-   */
-
-  class Alert extends BaseComponent {
-    // Getters
-    static get NAME() {
-      return NAME$d;
-    } // Public
-
-
-    close() {
-      const closeEvent = EventHandler.trigger(this._element, EVENT_CLOSE);
-
-      if (closeEvent.defaultPrevented) {
-        return;
-      }
-
-      this._element.classList.remove(CLASS_NAME_SHOW$8);
-
-      const isAnimated = this._element.classList.contains(CLASS_NAME_FADE$5);
-
-      this._queueCallback(() => this._destroyElement(), this._element, isAnimated);
-    } // Private
-
-
-    _destroyElement() {
-      this._element.remove();
-
-      EventHandler.trigger(this._element, EVENT_CLOSED);
-      this.dispose();
-    } // Static
-
-
-    static jQueryInterface(config) {
-      return this.each(function () {
-        const data = Alert.getOrCreateInstance(this);
-
-        if (typeof config !== 'string') {
-          return;
-        }
-
-        if (data[config] === undefined || config.startsWith('_') || config === 'constructor') {
-          throw new TypeError(`No method named "${config}"`);
-        }
-
-        data[config](this);
-      });
-    }
-
-  }
-  /**
-   * ------------------------------------------------------------------------
-   * Data Api implementation
-   * ------------------------------------------------------------------------
-   */
-
 
   enableDismissTrigger(Alert, 'close');
   /**
@@ -862,49 +333,7 @@
   const CLASS_NAME_ACTIVE$3 = 'active';
   const SELECTOR_DATA_TOGGLE$5 = '[data-bs-toggle="button"]';
   const EVENT_CLICK_DATA_API$6 = `click${EVENT_KEY$b}${DATA_API_KEY$7}`;
-  /**
-   * ------------------------------------------------------------------------
-   * Class Definition
-   * ------------------------------------------------------------------------
-   */
 
-  class Button extends BaseComponent {
-    // Getters
-    static get NAME() {
-      return NAME$c;
-    } // Public
-
-
-    toggle() {
-      // Toggle class and sync the `aria-pressed` attribute with the return value of the `.toggle()` method
-      this._element.setAttribute('aria-pressed', this._element.classList.toggle(CLASS_NAME_ACTIVE$3));
-    } // Static
-
-
-    static jQueryInterface(config) {
-      return this.each(function () {
-        const data = Button.getOrCreateInstance(this);
-
-        if (config === 'toggle') {
-          data[config]();
-        }
-      });
-    }
-
-  }
-  /**
-   * ------------------------------------------------------------------------
-   * Data Api implementation
-   * ------------------------------------------------------------------------
-   */
-
-
-  EventHandler.on(document, EVENT_CLICK_DATA_API$6, SELECTOR_DATA_TOGGLE$5, event => {
-    event.preventDefault();
-    const button = event.target.closest(SELECTOR_DATA_TOGGLE$5);
-    const data = Button.getOrCreateInstance(button);
-    data.toggle();
-  });
   /**
    * ------------------------------------------------------------------------
    * jQuery
@@ -940,19 +369,7 @@
     return val;
   }
 
-  function normalizeDataKey(key) {
-    return key.replace(/[A-Z]/g, chr => `-${chr.toLowerCase()}`);
-  }
-
   const Manipulator = {
-    setDataAttribute(element, key, value) {
-      element.setAttribute(`data-bs-${normalizeDataKey(key)}`, value);
-    },
-
-    removeDataAttribute(element, key) {
-      element.removeAttribute(`data-bs-${normalizeDataKey(key)}`);
-    },
-
     getDataAttributes(element) {
       if (!element) {
         return {};
@@ -966,34 +383,8 @@
       });
       return attributes;
     },
-
-    getDataAttribute(element, key) {
-      return normalizeData(element.getAttribute(`data-bs-${normalizeDataKey(key)}`));
-    },
-
-    offset(element) {
-      const rect = element.getBoundingClientRect();
-      return {
-        top: rect.top + window.pageYOffset,
-        left: rect.left + window.pageXOffset
-      };
-    },
-
-    position(element) {
-      return {
-        top: element.offsetTop,
-        left: element.offsetLeft
-      };
-    }
-
   };
 
-  /**
-   * --------------------------------------------------------------------------
-   * Bootstrap (v5.1.3): dom/selector-engine.js
-   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
-   * --------------------------------------------------------------------------
-   */
   const NODE_TEXT = 3;
   const SelectorEngine = {
     find(selector, element = document.documentElement) {
@@ -1003,72 +394,7 @@
     findOne(selector, element = document.documentElement) {
       return Element.prototype.querySelector.call(element, selector);
     },
-
-    children(element, selector) {
-      return [].concat(...element.children).filter(child => child.matches(selector));
-    },
-
-    parents(element, selector) {
-      const parents = [];
-      let ancestor = element.parentNode;
-
-      while (ancestor && ancestor.nodeType === Node.ELEMENT_NODE && ancestor.nodeType !== NODE_TEXT) {
-        if (ancestor.matches(selector)) {
-          parents.push(ancestor);
-        }
-
-        ancestor = ancestor.parentNode;
-      }
-
-      return parents;
-    },
-
-    prev(element, selector) {
-      let previous = element.previousElementSibling;
-
-      while (previous) {
-        if (previous.matches(selector)) {
-          return [previous];
-        }
-
-        previous = previous.previousElementSibling;
-      }
-
-      return [];
-    },
-
-    next(element, selector) {
-      let next = element.nextElementSibling;
-
-      while (next) {
-        if (next.matches(selector)) {
-          return [next];
-        }
-
-        next = next.nextElementSibling;
-      }
-
-      return [];
-    },
-
-    focusableChildren(element) {
-      const focusables = ['a', 'button', 'input', 'textarea', 'select', 'details', '[tabindex]', '[contenteditable="true"]'].map(selector => `${selector}:not([tabindex^="-"])`).join(', ');
-      return this.find(focusables, element).filter(el => !isDisabled(el) && isVisible(el));
-    }
-
   };
-
-  /**
-   * --------------------------------------------------------------------------
-   * Bootstrap (v5.1.3): carousel.js
-   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
-   * --------------------------------------------------------------------------
-   */
-  /**
-   * ------------------------------------------------------------------------
-   * Constants
-   * ------------------------------------------------------------------------
-   */
 
   const NAME$b = 'carousel';
   const DATA_KEY$a = 'bs.carousel';
@@ -1217,56 +543,14 @@
       }
     }
 
-    to(index) {
-      this._activeElement = SelectorEngine.findOne(SELECTOR_ACTIVE_ITEM, this._element);
-
-      const activeIndex = this._getItemIndex(this._activeElement);
-
-      if (index > this._items.length - 1 || index < 0) {
-        return;
-      }
-
-      if (this._isSliding) {
-        EventHandler.one(this._element, EVENT_SLID, () => this.to(index));
-        return;
-      }
-
-      if (activeIndex === index) {
-        this.pause();
-        this.cycle();
-        return;
-      }
-
-      const order = index > activeIndex ? ORDER_NEXT : ORDER_PREV;
-
-      this._slide(order, this._items[index]);
-    } // Private
-
-
     _getConfig(config) {
-      config = { ...Default$a,
+      config = {
+        ...Default$a,
         ...Manipulator.getDataAttributes(this._element),
         ...(typeof config === 'object' ? config : {})
       };
       typeCheckConfig(NAME$b, config, DefaultType$a);
       return config;
-    }
-
-    _handleSwipe() {
-      const absDeltax = Math.abs(this.touchDeltaX);
-
-      if (absDeltax <= SWIPE_THRESHOLD) {
-        return;
-      }
-
-      const direction = absDeltax / this.touchDeltaX;
-      this.touchDeltaX = 0;
-
-      if (!direction) {
-        return;
-      }
-
-      this._slide(direction > 0 ? DIRECTION_RIGHT : DIRECTION_LEFT);
     }
 
     _addEventListeners() {
@@ -1281,119 +565,6 @@
 
       if (this._config.touch && this._touchSupported) {
         this._addTouchEventListeners();
-      }
-    }
-
-    _addTouchEventListeners() {
-      const hasPointerPenTouch = event => {
-        return this._pointerEvent && (event.pointerType === POINTER_TYPE_PEN || event.pointerType === POINTER_TYPE_TOUCH);
-      };
-
-      const start = event => {
-        if (hasPointerPenTouch(event)) {
-          this.touchStartX = event.clientX;
-        } else if (!this._pointerEvent) {
-          this.touchStartX = event.touches[0].clientX;
-        }
-      };
-
-      const move = event => {
-        // ensure swiping with one touch and not pinching
-        this.touchDeltaX = event.touches && event.touches.length > 1 ? 0 : event.touches[0].clientX - this.touchStartX;
-      };
-
-      const end = event => {
-        if (hasPointerPenTouch(event)) {
-          this.touchDeltaX = event.clientX - this.touchStartX;
-        }
-
-        this._handleSwipe();
-
-        if (this._config.pause === 'hover') {
-          // If it's a touch-enabled device, mouseenter/leave are fired as
-          // part of the mouse compatibility events on first tap - the carousel
-          // would stop cycling until user tapped out of it;
-          // here, we listen for touchend, explicitly pause the carousel
-          // (as if it's the second time we tap on it, mouseenter compat event
-          // is NOT fired) and after a timeout (to allow for mouse compatibility
-          // events to fire) we explicitly restart cycling
-          this.pause();
-
-          if (this.touchTimeout) {
-            clearTimeout(this.touchTimeout);
-          }
-
-          this.touchTimeout = setTimeout(event => this.cycle(event), TOUCHEVENT_COMPAT_WAIT + this._config.interval);
-        }
-      };
-
-      SelectorEngine.find(SELECTOR_ITEM_IMG, this._element).forEach(itemImg => {
-        EventHandler.on(itemImg, EVENT_DRAG_START, event => event.preventDefault());
-      });
-
-      if (this._pointerEvent) {
-        EventHandler.on(this._element, EVENT_POINTERDOWN, event => start(event));
-        EventHandler.on(this._element, EVENT_POINTERUP, event => end(event));
-
-        this._element.classList.add(CLASS_NAME_POINTER_EVENT);
-      } else {
-        EventHandler.on(this._element, EVENT_TOUCHSTART, event => start(event));
-        EventHandler.on(this._element, EVENT_TOUCHMOVE, event => move(event));
-        EventHandler.on(this._element, EVENT_TOUCHEND, event => end(event));
-      }
-    }
-
-    _keydown(event) {
-      if (/input|textarea/i.test(event.target.tagName)) {
-        return;
-      }
-
-      const direction = KEY_TO_DIRECTION[event.key];
-
-      if (direction) {
-        event.preventDefault();
-
-        this._slide(direction);
-      }
-    }
-
-    _getItemIndex(element) {
-      this._items = element && element.parentNode ? SelectorEngine.find(SELECTOR_ITEM, element.parentNode) : [];
-      return this._items.indexOf(element);
-    }
-
-    _getItemByOrder(order, activeElement) {
-      const isNext = order === ORDER_NEXT;
-      return getNextActiveElement(this._items, activeElement, isNext, this._config.wrap);
-    }
-
-    _triggerSlideEvent(relatedTarget, eventDirectionName) {
-      const targetIndex = this._getItemIndex(relatedTarget);
-
-      const fromIndex = this._getItemIndex(SelectorEngine.findOne(SELECTOR_ACTIVE_ITEM, this._element));
-
-      return EventHandler.trigger(this._element, EVENT_SLIDE, {
-        relatedTarget,
-        direction: eventDirectionName,
-        from: fromIndex,
-        to: targetIndex
-      });
-    }
-
-    _setActiveIndicatorElement(element) {
-      if (this._indicatorsElement) {
-        const activeIndicator = SelectorEngine.findOne(SELECTOR_ACTIVE$1, this._indicatorsElement);
-        activeIndicator.classList.remove(CLASS_NAME_ACTIVE$2);
-        activeIndicator.removeAttribute('aria-current');
-        const indicators = SelectorEngine.find(SELECTOR_INDICATOR, this._indicatorsElement);
-
-        for (let i = 0; i < indicators.length; i++) {
-          if (Number.parseInt(indicators[i].getAttribute('data-bs-slide-to'), 10) === this._getItemIndex(element)) {
-            indicators[i].classList.add(CLASS_NAME_ACTIVE$2);
-            indicators[i].setAttribute('aria-current', 'true');
-            break;
-          }
-        }
       }
     }
 
@@ -1414,115 +585,6 @@
       }
     }
 
-    _slide(directionOrOrder, element) {
-      const order = this._directionToOrder(directionOrOrder);
-
-      const activeElement = SelectorEngine.findOne(SELECTOR_ACTIVE_ITEM, this._element);
-
-      const activeElementIndex = this._getItemIndex(activeElement);
-
-      const nextElement = element || this._getItemByOrder(order, activeElement);
-
-      const nextElementIndex = this._getItemIndex(nextElement);
-
-      const isCycling = Boolean(this._interval);
-      const isNext = order === ORDER_NEXT;
-      const directionalClassName = isNext ? CLASS_NAME_START : CLASS_NAME_END;
-      const orderClassName = isNext ? CLASS_NAME_NEXT : CLASS_NAME_PREV;
-
-      const eventDirectionName = this._orderToDirection(order);
-
-      if (nextElement && nextElement.classList.contains(CLASS_NAME_ACTIVE$2)) {
-        this._isSliding = false;
-        return;
-      }
-
-      if (this._isSliding) {
-        return;
-      }
-
-      const slideEvent = this._triggerSlideEvent(nextElement, eventDirectionName);
-
-      if (slideEvent.defaultPrevented) {
-        return;
-      }
-
-      if (!activeElement || !nextElement) {
-        // Some weirdness is happening, so we bail
-        return;
-      }
-
-      this._isSliding = true;
-
-      if (isCycling) {
-        this.pause();
-      }
-
-      this._setActiveIndicatorElement(nextElement);
-
-      this._activeElement = nextElement;
-
-      const triggerSlidEvent = () => {
-        EventHandler.trigger(this._element, EVENT_SLID, {
-          relatedTarget: nextElement,
-          direction: eventDirectionName,
-          from: activeElementIndex,
-          to: nextElementIndex
-        });
-      };
-
-      if (this._element.classList.contains(CLASS_NAME_SLIDE)) {
-        nextElement.classList.add(orderClassName);
-        reflow(nextElement);
-        activeElement.classList.add(directionalClassName);
-        nextElement.classList.add(directionalClassName);
-
-        const completeCallBack = () => {
-          nextElement.classList.remove(directionalClassName, orderClassName);
-          nextElement.classList.add(CLASS_NAME_ACTIVE$2);
-          activeElement.classList.remove(CLASS_NAME_ACTIVE$2, orderClassName, directionalClassName);
-          this._isSliding = false;
-          setTimeout(triggerSlidEvent, 0);
-        };
-
-        this._queueCallback(completeCallBack, activeElement, true);
-      } else {
-        activeElement.classList.remove(CLASS_NAME_ACTIVE$2);
-        nextElement.classList.add(CLASS_NAME_ACTIVE$2);
-        this._isSliding = false;
-        triggerSlidEvent();
-      }
-
-      if (isCycling) {
-        this.cycle();
-      }
-    }
-
-    _directionToOrder(direction) {
-      if (![DIRECTION_RIGHT, DIRECTION_LEFT].includes(direction)) {
-        return direction;
-      }
-
-      if (isRTL()) {
-        return direction === DIRECTION_LEFT ? ORDER_PREV : ORDER_NEXT;
-      }
-
-      return direction === DIRECTION_LEFT ? ORDER_NEXT : ORDER_PREV;
-    }
-
-    _orderToDirection(order) {
-      if (![ORDER_NEXT, ORDER_PREV].includes(order)) {
-        return order;
-      }
-
-      if (isRTL()) {
-        return order === ORDER_PREV ? DIRECTION_LEFT : DIRECTION_RIGHT;
-      }
-
-      return order === ORDER_PREV ? DIRECTION_RIGHT : DIRECTION_LEFT;
-    } // Static
-
-
     static carouselInterface(element, config) {
       const data = Carousel.getOrCreateInstance(element, config);
       let {
@@ -1530,7 +592,8 @@
       } = data;
 
       if (typeof config === 'object') {
-        _config = { ..._config,
+        _config = {
+          ..._config,
           ...config
         };
       }
@@ -1564,7 +627,8 @@
         return;
       }
 
-      const config = { ...Manipulator.getDataAttributes(target),
+      const config = {
+        ...Manipulator.getDataAttributes(target),
         ...Manipulator.getDataAttributes(this)
       };
       const slideIndex = this.getAttribute('data-bs-slide-to');
@@ -1828,7 +892,8 @@
 
 
     _getConfig(config) {
-      config = { ...Default$9,
+      config = {
+        ...Default$9,
         ...Manipulator.getDataAttributes(this._element),
         ...config
       };
@@ -2084,7 +1149,7 @@
 
   // import { isHTMLElement } from './instanceOf';
   function getBoundingClientRect(element, // eslint-disable-next-line unused-imports/no-unused-vars
-  includeScale) {
+    includeScale) {
 
     var rect = element.getBoundingClientRect();
     var scaleX = 1;
@@ -2150,17 +1215,17 @@
       return true;
     } // then fallback to custom implementation with Shadow DOM support
     else if (rootNode && isShadowRoot(rootNode)) {
-        var next = child;
+      var next = child;
 
-        do {
-          if (next && parent.isSameNode(next)) {
-            return true;
-          } // $FlowFixMe[prop-missing]: need a better way to handle this...
+      do {
+        if (next && parent.isSameNode(next)) {
+          return true;
+        } // $FlowFixMe[prop-missing]: need a better way to handle this...
 
 
-          next = next.parentNode || next.host;
-        } while (next);
-      } // Give up, the result is false
+        next = next.parentNode || next.host;
+      } while (next);
+    } // Give up, the result is false
 
 
     return false;
@@ -2177,7 +1242,7 @@
   function getDocumentElement(element) {
     // $FlowFixMe[incompatible-return]: assume body is always available
     return ((isElement(element) ? element.ownerDocument : // $FlowFixMe[prop-missing]
-    element.document) || window.document).documentElement;
+      element.document) || window.document).documentElement;
   }
 
   function getParentNode(element) {
@@ -2190,7 +1255,7 @@
       // $FlowFixMe[prop-missing]
       element.assignedSlot || // step into the shadow DOM of the parent of a slotted node
       element.parentNode || ( // DOM Element detected
-      isShadowRoot(element) ? element.host : null) || // ShadowRoot detected
+        isShadowRoot(element) ? element.host : null) || // ShadowRoot detected
       // $FlowFixMe[incompatible-call]: HTMLElement is a Node
       getDocumentElement(element) // fallback
 
@@ -2199,7 +1264,7 @@
 
   function getTrueOffsetParent(element) {
     if (!isHTMLElement(element) || // https://github.com/popperjs/popper-core/issues/837
-    getComputedStyle$1(element).position === 'fixed') {
+      getComputedStyle$1(element).position === 'fixed') {
       return null;
     }
 
@@ -2298,8 +1363,8 @@
     var _state$modifiersData$;
 
     var state = _ref.state,
-        name = _ref.name,
-        options = _ref.options;
+      name = _ref.name,
+      options = _ref.options;
     var arrowElement = state.elements.arrow;
     var popperOffsets = state.modifiersData.popperOffsets;
     var basePlacement = getBasePlacement(state.placement);
@@ -2333,9 +1398,9 @@
 
   function effect$1(_ref2) {
     var state = _ref2.state,
-        options = _ref2.options;
+      options = _ref2.options;
     var _options$element = options.element,
-        arrowElement = _options$element === void 0 ? '[data-popper-arrow]' : _options$element;
+      arrowElement = _options$element === void 0 ? '[data-popper-arrow]' : _options$element;
 
     if (arrowElement == null) {
       return;
@@ -2384,7 +1449,7 @@
 
   function roundOffsetsByDPR(_ref) {
     var x = _ref.x,
-        y = _ref.y;
+      y = _ref.y;
     var win = window;
     var dpr = win.devicePixelRatio || 1;
     return {
@@ -2397,20 +1462,20 @@
     var _Object$assign2;
 
     var popper = _ref2.popper,
-        popperRect = _ref2.popperRect,
-        placement = _ref2.placement,
-        variation = _ref2.variation,
-        offsets = _ref2.offsets,
-        position = _ref2.position,
-        gpuAcceleration = _ref2.gpuAcceleration,
-        adaptive = _ref2.adaptive,
-        roundOffsets = _ref2.roundOffsets;
+      popperRect = _ref2.popperRect,
+      placement = _ref2.placement,
+      variation = _ref2.variation,
+      offsets = _ref2.offsets,
+      position = _ref2.position,
+      gpuAcceleration = _ref2.gpuAcceleration,
+      adaptive = _ref2.adaptive,
+      roundOffsets = _ref2.roundOffsets;
 
     var _ref3 = roundOffsets === true ? roundOffsetsByDPR(offsets) : typeof roundOffsets === 'function' ? roundOffsets(offsets) : offsets,
-        _ref3$x = _ref3.x,
-        x = _ref3$x === void 0 ? 0 : _ref3$x,
-        _ref3$y = _ref3.y,
-        y = _ref3$y === void 0 ? 0 : _ref3$y;
+      _ref3$x = _ref3.x,
+      x = _ref3$x === void 0 ? 0 : _ref3$x,
+      _ref3$y = _ref3.y,
+      y = _ref3$y === void 0 ? 0 : _ref3$y;
 
     var hasX = offsets.hasOwnProperty('x');
     var hasY = offsets.hasOwnProperty('y');
@@ -2465,13 +1530,13 @@
 
   function computeStyles(_ref4) {
     var state = _ref4.state,
-        options = _ref4.options;
+      options = _ref4.options;
     var _options$gpuAccelerat = options.gpuAcceleration,
-        gpuAcceleration = _options$gpuAccelerat === void 0 ? true : _options$gpuAccelerat,
-        _options$adaptive = options.adaptive,
-        adaptive = _options$adaptive === void 0 ? true : _options$adaptive,
-        _options$roundOffsets = options.roundOffsets,
-        roundOffsets = _options$roundOffsets === void 0 ? true : _options$roundOffsets;
+      gpuAcceleration = _options$gpuAccelerat === void 0 ? true : _options$gpuAccelerat,
+      _options$adaptive = options.adaptive,
+      adaptive = _options$adaptive === void 0 ? true : _options$adaptive,
+      _options$roundOffsets = options.roundOffsets,
+      roundOffsets = _options$roundOffsets === void 0 ? true : _options$roundOffsets;
 
     var commonStyles = {
       placement: getBasePlacement(state.placement),
@@ -2519,12 +1584,12 @@
 
   function effect(_ref) {
     var state = _ref.state,
-        instance = _ref.instance,
-        options = _ref.options;
+      instance = _ref.instance,
+      options = _ref.options;
     var _options$scroll = options.scroll,
-        scroll = _options$scroll === void 0 ? true : _options$scroll,
-        _options$resize = options.resize,
-        resize = _options$resize === void 0 ? true : _options$resize;
+      scroll = _options$scroll === void 0 ? true : _options$scroll,
+      _options$resize = options.resize,
+      resize = _options$resize === void 0 ? true : _options$resize;
     var window = getWindow(state.elements.popper);
     var scrollParents = [].concat(state.scrollParents.reference, state.scrollParents.popper);
 
@@ -2556,7 +1621,7 @@
     name: 'eventListeners',
     enabled: true,
     phase: 'write',
-    fn: function fn() {},
+    fn: function fn() { },
     effect: effect,
     data: {}
   };
@@ -2670,9 +1735,9 @@
   function isScrollParent(element) {
     // Firefox wants us to check `-x` and `-y` variations as well
     var _getComputedStyle = getComputedStyle$1(element),
-        overflow = _getComputedStyle.overflow,
-        overflowX = _getComputedStyle.overflowX,
-        overflowY = _getComputedStyle.overflowY;
+      overflow = _getComputedStyle.overflow,
+      overflowX = _getComputedStyle.overflowX,
+      overflowY = _getComputedStyle.overflowY;
 
     return /auto|scroll|overlay|hidden/.test(overflow + overflowY + overflowX);
   }
@@ -2710,7 +1775,7 @@
     var target = isBody ? [win].concat(win.visualViewport || [], isScrollParent(scrollParent) ? scrollParent : []) : scrollParent;
     var updatedList = list.concat(target);
     return isBody ? updatedList : // $FlowFixMe[incompatible-call]: isBody tells us target will be an HTMLElement here
-    updatedList.concat(listScrollParents(getParentNode(target)));
+      updatedList.concat(listScrollParents(getParentNode(target)));
   }
 
   function rectToClientRect(rect) {
@@ -2780,8 +1845,8 @@
 
   function computeOffsets(_ref) {
     var reference = _ref.reference,
-        element = _ref.element,
-        placement = _ref.placement;
+      element = _ref.element,
+      placement = _ref.placement;
     var basePlacement = placement ? getBasePlacement(placement) : null;
     var variation = placement ? getVariation(placement) : null;
     var commonX = reference.x + reference.width / 2 - element.width / 2;
@@ -2849,18 +1914,18 @@
     }
 
     var _options = options,
-        _options$placement = _options.placement,
-        placement = _options$placement === void 0 ? state.placement : _options$placement,
-        _options$boundary = _options.boundary,
-        boundary = _options$boundary === void 0 ? clippingParents : _options$boundary,
-        _options$rootBoundary = _options.rootBoundary,
-        rootBoundary = _options$rootBoundary === void 0 ? viewport : _options$rootBoundary,
-        _options$elementConte = _options.elementContext,
-        elementContext = _options$elementConte === void 0 ? popper : _options$elementConte,
-        _options$altBoundary = _options.altBoundary,
-        altBoundary = _options$altBoundary === void 0 ? false : _options$altBoundary,
-        _options$padding = _options.padding,
-        padding = _options$padding === void 0 ? 0 : _options$padding;
+      _options$placement = _options.placement,
+      placement = _options$placement === void 0 ? state.placement : _options$placement,
+      _options$boundary = _options.boundary,
+      boundary = _options$boundary === void 0 ? clippingParents : _options$boundary,
+      _options$rootBoundary = _options.rootBoundary,
+      rootBoundary = _options$rootBoundary === void 0 ? viewport : _options$rootBoundary,
+      _options$elementConte = _options.elementContext,
+      elementContext = _options$elementConte === void 0 ? popper : _options$elementConte,
+      _options$altBoundary = _options.altBoundary,
+      altBoundary = _options$altBoundary === void 0 ? false : _options$altBoundary,
+      _options$padding = _options.padding,
+      padding = _options$padding === void 0 ? 0 : _options$padding;
     var paddingObject = mergePaddingObject(typeof padding !== 'number' ? padding : expandToHashMap(padding, basePlacements));
     var altContext = elementContext === popper ? reference : popper;
     var popperRect = state.rects.popper;
@@ -2903,13 +1968,13 @@
     }
 
     var _options = options,
-        placement = _options.placement,
-        boundary = _options.boundary,
-        rootBoundary = _options.rootBoundary,
-        padding = _options.padding,
-        flipVariations = _options.flipVariations,
-        _options$allowedAutoP = _options.allowedAutoPlacements,
-        allowedAutoPlacements = _options$allowedAutoP === void 0 ? placements : _options$allowedAutoP;
+      placement = _options.placement,
+      boundary = _options.boundary,
+      rootBoundary = _options.rootBoundary,
+      padding = _options.padding,
+      flipVariations = _options.flipVariations,
+      _options$allowedAutoP = _options.allowedAutoPlacements,
+      allowedAutoPlacements = _options$allowedAutoP === void 0 ? placements : _options$allowedAutoP;
     var variation = getVariation(placement);
     var placements$1 = variation ? flipVariations ? variationPlacements : variationPlacements.filter(function (placement) {
       return getVariation(placement) === variation;
@@ -2948,25 +2013,25 @@
 
   function flip(_ref) {
     var state = _ref.state,
-        options = _ref.options,
-        name = _ref.name;
+      options = _ref.options,
+      name = _ref.name;
 
     if (state.modifiersData[name]._skip) {
       return;
     }
 
     var _options$mainAxis = options.mainAxis,
-        checkMainAxis = _options$mainAxis === void 0 ? true : _options$mainAxis,
-        _options$altAxis = options.altAxis,
-        checkAltAxis = _options$altAxis === void 0 ? true : _options$altAxis,
-        specifiedFallbackPlacements = options.fallbackPlacements,
-        padding = options.padding,
-        boundary = options.boundary,
-        rootBoundary = options.rootBoundary,
-        altBoundary = options.altBoundary,
-        _options$flipVariatio = options.flipVariations,
-        flipVariations = _options$flipVariatio === void 0 ? true : _options$flipVariatio,
-        allowedAutoPlacements = options.allowedAutoPlacements;
+      checkMainAxis = _options$mainAxis === void 0 ? true : _options$mainAxis,
+      _options$altAxis = options.altAxis,
+      checkAltAxis = _options$altAxis === void 0 ? true : _options$altAxis,
+      specifiedFallbackPlacements = options.fallbackPlacements,
+      padding = options.padding,
+      boundary = options.boundary,
+      rootBoundary = options.rootBoundary,
+      altBoundary = options.altBoundary,
+      _options$flipVariatio = options.flipVariations,
+      flipVariations = _options$flipVariatio === void 0 ? true : _options$flipVariatio,
+      allowedAutoPlacements = options.allowedAutoPlacements;
     var preferredPlacement = state.options.placement;
     var basePlacement = getBasePlacement(preferredPlacement);
     var isBasePlacement = basePlacement === preferredPlacement;
@@ -3101,7 +2166,7 @@
 
   function hide(_ref) {
     var state = _ref.state,
-        name = _ref.name;
+      name = _ref.name;
     var referenceRect = state.rects.reference;
     var popperRect = state.rects.popper;
     var preventedOffsets = state.modifiersData.preventOverflow;
@@ -3143,8 +2208,8 @@
     var _ref = typeof offset === 'function' ? offset(Object.assign({}, rects, {
       placement: placement
     })) : offset,
-        skidding = _ref[0],
-        distance = _ref[1];
+      skidding = _ref[0],
+      distance = _ref[1];
 
     skidding = skidding || 0;
     distance = (distance || 0) * invertDistance;
@@ -3159,17 +2224,17 @@
 
   function offset(_ref2) {
     var state = _ref2.state,
-        options = _ref2.options,
-        name = _ref2.name;
+      options = _ref2.options,
+      name = _ref2.name;
     var _options$offset = options.offset,
-        offset = _options$offset === void 0 ? [0, 0] : _options$offset;
+      offset = _options$offset === void 0 ? [0, 0] : _options$offset;
     var data = placements.reduce(function (acc, placement) {
       acc[placement] = distanceAndSkiddingToXY(placement, state.rects, offset);
       return acc;
     }, {});
     var _data$state$placement = data[state.placement],
-        x = _data$state$placement.x,
-        y = _data$state$placement.y;
+      x = _data$state$placement.x,
+      y = _data$state$placement.y;
 
     if (state.modifiersData.popperOffsets != null) {
       state.modifiersData.popperOffsets.x += x;
@@ -3190,7 +2255,7 @@
 
   function popperOffsets(_ref) {
     var state = _ref.state,
-        name = _ref.name;
+      name = _ref.name;
     // Offsets are the actual position the popper needs to have to be
     // properly positioned near its reference element
     // This is the most basic placement, and will be adjusted by
@@ -3218,20 +2283,20 @@
 
   function preventOverflow(_ref) {
     var state = _ref.state,
-        options = _ref.options,
-        name = _ref.name;
+      options = _ref.options,
+      name = _ref.name;
     var _options$mainAxis = options.mainAxis,
-        checkMainAxis = _options$mainAxis === void 0 ? true : _options$mainAxis,
-        _options$altAxis = options.altAxis,
-        checkAltAxis = _options$altAxis === void 0 ? false : _options$altAxis,
-        boundary = options.boundary,
-        rootBoundary = options.rootBoundary,
-        altBoundary = options.altBoundary,
-        padding = options.padding,
-        _options$tether = options.tether,
-        tether = _options$tether === void 0 ? true : _options$tether,
-        _options$tetherOffset = options.tetherOffset,
-        tetherOffset = _options$tetherOffset === void 0 ? 0 : _options$tetherOffset;
+      checkMainAxis = _options$mainAxis === void 0 ? true : _options$mainAxis,
+      _options$altAxis = options.altAxis,
+      checkAltAxis = _options$altAxis === void 0 ? false : _options$altAxis,
+      boundary = options.boundary,
+      rootBoundary = options.rootBoundary,
+      altBoundary = options.altBoundary,
+      padding = options.padding,
+      _options$tether = options.tether,
+      tether = _options$tether === void 0 ? true : _options$tether,
+      _options$tetherOffset = options.tetherOffset,
+      tetherOffset = _options$tetherOffset === void 0 ? 0 : _options$tetherOffset;
     var overflow = detectOverflow(state, {
       boundary: boundary,
       rootBoundary: rootBoundary,
@@ -3372,7 +2437,7 @@
 
     if (isOffsetParentAnElement || !isOffsetParentAnElement && !isFixed) {
       if (getNodeName(offsetParent) !== 'body' || // https://github.com/popperjs/popper-core/issues/1078
-      isScrollParent(documentElement)) {
+        isScrollParent(documentElement)) {
         scroll = getNodeScroll(offsetParent);
       }
 
@@ -3489,10 +2554,10 @@
     }
 
     var _generatorOptions = generatorOptions,
-        _generatorOptions$def = _generatorOptions.defaultModifiers,
-        defaultModifiers = _generatorOptions$def === void 0 ? [] : _generatorOptions$def,
-        _generatorOptions$def2 = _generatorOptions.defaultOptions,
-        defaultOptions = _generatorOptions$def2 === void 0 ? DEFAULT_OPTIONS : _generatorOptions$def2;
+      _generatorOptions$def = _generatorOptions.defaultModifiers,
+      defaultModifiers = _generatorOptions$def === void 0 ? [] : _generatorOptions$def,
+      _generatorOptions$def2 = _generatorOptions.defaultOptions,
+      defaultOptions = _generatorOptions$def2 === void 0 ? DEFAULT_OPTIONS : _generatorOptions$def2;
     return function createPopper(reference, popper, options) {
       if (options === void 0) {
         options = defaultOptions;
@@ -3544,8 +2609,8 @@
           }
 
           var _state$elements = state.elements,
-              reference = _state$elements.reference,
-              popper = _state$elements.popper; // Don't proceed if `reference` or `popper` are not valid elements
+            reference = _state$elements.reference,
+            popper = _state$elements.popper; // Don't proceed if `reference` or `popper` are not valid elements
           // anymore
 
           if (!areValidElements(reference, popper)) {
@@ -3582,10 +2647,10 @@
             }
 
             var _state$orderedModifie = state.orderedModifiers[index],
-                fn = _state$orderedModifie.fn,
-                _state$orderedModifie2 = _state$orderedModifie.options,
-                _options = _state$orderedModifie2 === void 0 ? {} : _state$orderedModifie2,
-                name = _state$orderedModifie.name;
+              fn = _state$orderedModifie.fn,
+              _state$orderedModifie2 = _state$orderedModifie.options,
+              _options = _state$orderedModifie2 === void 0 ? {} : _state$orderedModifie2,
+              name = _state$orderedModifie.name;
 
             if (typeof fn === 'function') {
               state = fn({
@@ -3629,9 +2694,9 @@
       function runModifierEffects() {
         state.orderedModifiers.forEach(function (_ref3) {
           var name = _ref3.name,
-              _ref3$options = _ref3.options,
-              options = _ref3$options === void 0 ? {} : _ref3$options,
-              effect = _ref3.effect;
+            _ref3$options = _ref3.options,
+            options = _ref3$options === void 0 ? {} : _ref3$options,
+            effect = _ref3.effect;
 
           if (typeof effect === 'function') {
             var cleanupFn = effect({
@@ -3641,7 +2706,7 @@
               options: options
             });
 
-            var noopFn = function noopFn() {};
+            var noopFn = function noopFn() { };
 
             effectCleanupFns.push(cleanupFn || noopFn);
           }
@@ -3905,7 +2970,8 @@
     }
 
     _getConfig(config) {
-      config = { ...this.constructor.Default,
+      config = {
+        ...this.constructor.Default,
         ...Manipulator.getDataAttributes(this._element),
         ...config
       };
@@ -4016,7 +3082,8 @@
         }];
       }
 
-      return { ...defaultBsPopperConfig,
+      return {
+        ...defaultBsPopperConfig,
         ...(typeof this._config.popperConfig === 'function' ? this._config.popperConfig(defaultBsPopperConfig) : this._config.popperConfig)
       };
     }
@@ -4362,7 +3429,8 @@
     }
 
     _getConfig(config) {
-      config = { ...Default$7,
+      config = {
+        ...Default$7,
         ...(typeof config === 'object' ? config : {})
       }; // use getElement() with the default "body" to get a fresh Element on each instantiation
 
@@ -4496,7 +3564,8 @@
     }
 
     _getConfig(config) {
-      config = { ...Default$6,
+      config = {
+        ...Default$6,
         ...(typeof config === 'object' ? config : {})
       };
       typeCheckConfig(NAME$7, config, DefaultType$6);
@@ -4687,7 +3756,8 @@
     }
 
     _getConfig(config) {
-      config = { ...Default$5,
+      config = {
+        ...Default$5,
         ...Manipulator.getDataAttributes(this._element),
         ...(typeof config === 'object' ? config : {})
       };
@@ -5096,7 +4166,8 @@
 
 
     _getConfig(config) {
-      config = { ...Default$4,
+      config = {
+        ...Default$4,
         ...Manipulator.getDataAttributes(this._element),
         ...(typeof config === 'object' ? config : {})
       };
@@ -5772,7 +4843,8 @@
           }
         }
       };
-      return { ...defaultBsPopperConfig,
+      return {
+        ...defaultBsPopperConfig,
         ...(typeof this._config.popperConfig === 'function' ? this._config.popperConfig(defaultBsPopperConfig) : this._config.popperConfig)
       };
     }
@@ -5808,7 +4880,8 @@
       EventHandler.on(this._element.closest(SELECTOR_MODAL), EVENT_MODAL_HIDE, this._hideModalHandler);
 
       if (this._config.selector) {
-        this._config = { ...this._config,
+        this._config = {
+          ...this._config,
           trigger: 'manual',
           selector: ''
         };
@@ -5903,7 +4976,8 @@
           delete dataAttributes[dataAttr];
         }
       });
-      config = { ...this.constructor.Default,
+      config = {
+        ...this.constructor.Default,
         ...dataAttributes,
         ...(typeof config === 'object' && config ? config : {})
       };
@@ -6028,14 +5102,16 @@
   const DATA_KEY$3 = 'bs.popover';
   const EVENT_KEY$3 = `.${DATA_KEY$3}`;
   const CLASS_PREFIX = 'bs-popover';
-  const Default$2 = { ...Tooltip.Default,
+  const Default$2 = {
+    ...Tooltip.Default,
     placement: 'right',
     offset: [0, 8],
     trigger: 'click',
     content: '',
     template: '<div class="popover" role="tooltip">' + '<div class="popover-arrow"></div>' + '<h3 class="popover-header"></h3>' + '<div class="popover-body"></div>' + '</div>'
   };
-  const DefaultType$2 = { ...Tooltip.DefaultType,
+  const DefaultType$2 = {
+    ...Tooltip.DefaultType,
     content: '(string|element|function)'
   };
   const Event$1 = {
@@ -6229,7 +5305,8 @@
 
 
     _getConfig(config) {
-      config = { ...Default$1,
+      config = {
+        ...Default$1,
         ...Manipulator.getDataAttributes(this._element),
         ...(typeof config === 'object' && config ? config : {})
       };
@@ -6696,7 +5773,8 @@
 
 
     _getConfig(config) {
-      config = { ...Default,
+      config = {
+        ...Default,
         ...Manipulator.getDataAttributes(this._element),
         ...(typeof config === 'object' && config ? config : {})
       };
