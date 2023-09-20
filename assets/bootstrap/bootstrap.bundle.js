@@ -3984,7 +3984,6 @@
     const data = Modal.getOrCreateInstance(target);
     data.toggle(this);
   });
-  enableDismissTrigger(Modal);
   /**
    * ------------------------------------------------------------------------
    * jQuery
@@ -4242,7 +4241,6 @@
     data.toggle(this);
   });
   EventHandler.on(window, EVENT_LOAD_DATA_API$1, () => SelectorEngine.find(OPEN_SELECTOR).forEach(el => Offcanvas.getOrCreateInstance(el).show()));
-  enableDismissTrigger(Offcanvas);
   /**
    * ------------------------------------------------------------------------
    * jQuery
@@ -5843,7 +5841,6 @@
 
   }
 
-  enableDismissTrigger(Toast);
   /**
    * ------------------------------------------------------------------------
    * jQuery
