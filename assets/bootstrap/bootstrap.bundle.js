@@ -323,15 +323,7 @@
     });
   };
 
-  enableDismissTrigger(Alert, 'close');
-  /**
-   * ------------------------------------------------------------------------
-   * jQuery
-   * ------------------------------------------------------------------------
-   * add .Alert to jQuery only if jQuery is present
-   */
-
-  defineJQueryPlugin(Alert);
+  enableDismissTrigger('close');
 
   /**
    * --------------------------------------------------------------------------
@@ -362,44 +354,6 @@
 
   defineJQueryPlugin(Button);
 
-  /**
- * ------------------------------------------------------------------------
- * Class Definition
- * ------------------------------------------------------------------------
- */
-
-  class Alert extends BaseComponent {
-    // Getters
-    static get NAME() {
-      return NAME$d;
-    } // Public
-
-    _destroyElement() {
-      this._element.remove();
-
-      EventHandler.trigger(this._element, EVENT_CLOSED);
-      this.dispose();
-    } // Static
-
-
-    static jQueryInterface(config) {
-      return this.each(function () {
-        const data = Alert.getOrCreateInstance(this);
-
-        if (typeof config !== 'string') {
-          return;
-        }
-
-        if (data[config] === undefined || config.startsWith('_') || config === 'constructor') {
-          throw new TypeError(`No method named "${config}"`);
-        }
-
-        data[config](this);
-      });
-    }
-
-  }
-  
   /**
    * --------------------------------------------------------------------------
    * Bootstrap (v5.1.3): dom/manipulator.js
@@ -5927,7 +5881,6 @@
    * --------------------------------------------------------------------------
    */
   const index_umd = {
-    Alert,
     Button,
     Carousel,
     Collapse,
