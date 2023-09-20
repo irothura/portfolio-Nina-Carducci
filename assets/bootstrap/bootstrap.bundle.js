@@ -635,7 +635,6 @@
    */
 
 
-  EventHandler.on(document, EVENT_CLICK_DATA_API$5, SELECTOR_DATA_SLIDE, Carousel.dataApiClickHandler);
   EventHandler.on(window, EVENT_LOAD_DATA_API$2, () => {
     const carousels = SelectorEngine.find(SELECTOR_DATA_RIDE);
 
