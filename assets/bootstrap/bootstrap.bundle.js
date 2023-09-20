@@ -304,8 +304,6 @@
   const CLASS_NAME_FADE$5 = 'fade';
   const CLASS_NAME_SHOW$8 = 'show';
 
-  enableDismissTrigger('close');
-
   /**
    * --------------------------------------------------------------------------
    * Bootstrap (v5.1.3): button.js
